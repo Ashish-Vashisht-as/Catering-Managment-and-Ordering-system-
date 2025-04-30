@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .payment-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .payment-form {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            padding: 30px;
+        }
+        
+        .payment-form h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .payment-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .payment-form input[type="text"],
+        .payment-form input[type="email"],
+        .payment-form input[type="number"],
+        .payment-form input[type="month"],
+        .payment-form select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+      
+        
+        .payment-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .payment-form button:hover {
+            background-color: #45a049;
+        }
+        
+        /* Animation */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .payment-form {
+            animation: fade-in 0.5s ease;
+        }
+        
+    
+      
+        
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-form">
+            <h2>Payment Details</h2>
+            <form action="{% url 'process_payment' transaction_id %}" method="post">
+                {% csrf_token %}
+                <label for="card_number">Card Number:</label><br>
+                <input type="text" id="card_number" name="card_number" placeholder="Enter your card number" required><br>
+                <label for="expiry_date">Expiry Date:</label><br>
+                <input type="month" id="expiry_date" name="expiry_date" required>
+                <label for="cvv">CVV:</label><br>
+                <input type="text" id="cvv" name="cvv" placeholder="Enter CVV" required><br>
+                <input type="number" id="amount" name="amount" value="{{ totalamt }}" readonly><br><br>
+                <button type="submit" id="pay-button">Pay Now</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

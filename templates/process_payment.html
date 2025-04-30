@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .processing-container {
+            width: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+        }
+        
+        .processing-animation {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #3498db;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        .processing-message {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #495057;
+        }
+        
+        .transaction-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #495057;
+            visibility: hidden;
+        }
+        
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+        
+        .track-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+
+        .track-button:hover {
+            background-color: #0056b3;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="processing-container">
+        <div class="processing-animation"></div>
+        <p class="processing-message">Processing Payment... Please wait.</p>
+        <p class="transaction-info hidden">Transaction ID: <span id="transaction-id"></span></p>
+        <p class="success-message hidden">Payment successful!</p>
+        <a href="{% url 'track_order' %}" class="track-button hidden">Track Order</a>
+    </div>
+
+    <script>
+        // Simulate redirect after 3 seconds
+        setTimeout(function() {
+            // Simulate successful payment
+            document.querySelector('.processing-animation').style.display = 'none';
+            document.querySelector('.processing-message').style.display = 'none';
+            document.querySelector('.transaction-info').style.visibility="visible";
+
+            // Simulate generating transaction ID
+            var transactionID = "{{ transaction.transaction_id }}"; // Ensure transaction_id is properly accessed
+            document.getElementById('transaction-id').textContent = transactionID;
+
+            // Show success message and button after 3 seconds
+            document.querySelector('.success-message').style.visibility = 'visible';
+            document.querySelector('.track-button').style.visibility = 'visible';
+        }, 3000);
+    </script>
+</body>
+</html>

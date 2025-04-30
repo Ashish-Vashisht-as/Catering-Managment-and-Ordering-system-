@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 0;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .resend-container {
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .resend-link {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .resend-link:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>OTP Verification</h3>
+        <form action="/verify_otp" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" name="otp" id="otp" placeholder="Enter OTP" required>
+            </div>
+            <button type="submit">Verify OTP</button>
+        </form>
+        <div class="resend-container" id="resend-container">
+            Didn't receive OTP? <a href="#" class="resend-link" id="resend-link">Resend OTP</a>
+        </div>
+    </div>
+
+    <script>
+        var resendLink = document.getElementById('resend-link');
+        var resendContainer = document.getElementById('resend-container');
+        var countdown = 30;
+        var timer;
+
+        function startCountdown() {
+            countdown = 30;
+            timer = setInterval(function() {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    resendLink.innerHTML = 'Resend OTP';
+                    resendLink.style.cursor = 'pointer';
+                    resendLink.onclick = resendOTP;
+                } else {
+                    resendLink.innerHTML = 'Resend OTP (' + countdown + ')';
+                }
+            }, 1000);
+        }
+
+        function resendOTP() {
+            clearInterval(timer);
+            resendLink.innerHTML = 'Resending...';
+            resendLink.style.cursor = 'not-allowed';
+            // Make an AJAX request to resend OTP
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/resend_otp', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    startCountdown();
+                } else {
+                    alert('Failed to resend OTP');
+                    resendLink.innerHTML = 'Resend OTP';
+                    resendLink.style.cursor = 'pointer';
+                }
+            };
+            xhr.send();
+            return false;  // Prevent default link behavior
+        }
+
+        // Disable resend link initially
+        resendLink.style.cursor = 'not-allowed';
+        resendLink.onclick = function(event) {
+            event.preventDefault(); // Prevent default link behavior
+        };
+
+        startCountdown();
+    </script>
+</body>
+</html>

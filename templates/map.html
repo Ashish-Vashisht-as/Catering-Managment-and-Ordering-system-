@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; }
+        #map-container { position: relative; width: 100%; height: 80%; }
+        #map { height: 100%; }
+        .review-form { margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 5px; }
+        .review-form h2 { margin-top: 0; }
+        .review-form input[type="text"], .review-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .review-form textarea { min-height: 100px; }
+        .review-form button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .review-form button:hover { background-color: #0056b3; }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            z-index: 999;
+        }
+        .popup-content ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .popup-content ul li {
+            margin-bottom: 10px;
+        }
+        .popup-content .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div class="review-form">
+        <h2>Customer Review</h2>
+        <form id="reviewForm" method="post" action="{% url 'submit_review' %}">
+            {% csrf_token %}
+            <input type="text" id="customerName" name="customerName" placeholder="Your Name" required><br>
+            <textarea id="reviewText" name="reviewText" placeholder="Write your review here" required></textarea><br>
+            <button type="submit">Submit Review</button>
+        </form>
+    </div>
+
+    <!-- Popup for messages -->
+    {% if messages %}
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script>
+        var map = L.map('map').setView([28.6139, 77.2090], 12);
+        var routingControl;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Add marker for destination
+        var destinationMarker = L.marker([28.6329, 77.2183]).addTo(map);
+
+        // Get current location using browser's geolocation API
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+
+                    // Add marker for current location
+                    var currentLocationMarker = L.marker([latitude, longitude]).addTo(map);
+
+                    // Show route
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(latitude, longitude),
+                            L.latLng(28.6329, 77.2183) // Zero Degree Restaurant Location
+                        ],
+                        routeWhileDragging: true
+                    }).addTo(map);
+
+                    // Fit bounds to show both current location and destination
+                    var bounds = L.latLngBounds([latitude, longitude], [28.6329, 77.2183]);
+                    map.fitBounds(bounds);
+                }, function(error) {
+                    console.error('Error getting current location:', error.message);
+                    // Show error message
+                    showMessage('Failed to get current location. Please try again.');
+                });
+            } else {
+                console.error('Geolocation is not supported by your browser');
+                // Show error message
+                showMessage('Geolocation is not supported by your browser.');
+            }
+        }
+
+        // Call to get current location when the page loads
+        getCurrentLocation();
+
+        // Function to show messages
+        function showMessage(message) {
+            var popup = document.getElementById('popup');
+            var popupContent = document.querySelector('.popup-content ul');
+            popup.style.display = 'block';
+            popupContent.innerHTML = '<li>' + message + '</li>';
+            setTimeout(function() {
+                popup.style.display = 'none';
+            }, 5000);
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+    </script>
+</body>
+</html>
